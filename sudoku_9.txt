@@ -1,0 +1,20 @@
+Chaque sommet est relié aux 19 autres. 
+Donc on a:
+8*9 + 9*8 = 144 arcs pour faire la grille
++ 8*9 = 72 arcs pour les petites diagonales dans les carrés
++ 2*9 = 18 arcs pour les grandes diagonales dans les carrés
++ 8*9 = 72 arcs pour les étoiles dans les carrés
++ 9*(7 + 6 + 5 + 4 + 3 + 2 + 1) = 9*(8*7/2) = 252 arcs pour les liaisons par ligne
++ 9*(7 + 6 + 5 + 4 + 3 + 2 + 1) = 252 arcs pour les liaisons par colonne
+
+Autre façon de le voir:
+Par carré: nb d'arrêtes avec diagonales dans un nonagone: 36
+Donc par carré on a 36 * 9 = 324 arcs.
+Plus, par ligne: 6+6+6 + 3+3+3 = 27 arcs par ligne, donc 27*9 = 243
+Idem, par colonne: 27 arcs par colonne, donc 27*9 = 243 
+
+Au total: 324 + 2*243 = 810
+
+Total: 810 arcs. 
+
+Bon, on ne va pas coder ça à la main. 
