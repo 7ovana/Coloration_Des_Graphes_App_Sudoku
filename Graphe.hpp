@@ -44,17 +44,15 @@ public:
     std::vector<Arc> ListA; // liste des Arcs
     std::unordered_map<int, std::vector<int>> vois; // hash map des voisins
 
-
     Graphe(const char * filename = "default_graph.txt"); // constructeur a partir d'un fichier
     Graphe(int size); // constructeur pour les sudokus
     std::unordered_map<int, std::vector<int>> neighbours(); // stocke les voisins des nodes (sommets adjacents) dans vois
 
-
     std::vector<int> neighborsArcs(int node); // renvoie la liste des indices des arcs attaches au node
     std::vector<int> Adj(int node); // renvoie les voisins du node (sommets adjacents)
-    std::vector<int> cols(int node, int K, std::vector<int> &assigned_colors); // renvoie la liste des couleurs disponibles pour node
-    void Init(int K, std::vector<int> &col, std::vector<int> &assigned_colors); // initialise col
-    void sort_by_available_colours(int K, std::vector<int> &nodes, std::vector<int> &assigned_colors); // sort noeuds 
+    void cols(int node, int K, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors); // renvoie la liste des couleurs disponibles pour node
+    void Init(int K, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors); // initialise col
+    void sort_by_available_colours(int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors); // sort noeuds 
 
     // Backtracking graph coloring algorithm 
 
@@ -67,7 +65,7 @@ public:
     
     // Backtracking coloring algorithm modified 
 
-    bool try_graph_coloring_BIS(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
+    bool try_graph_coloring_BIS(int node, int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col,
                                 std::vector<int> &assigned_colors, int colored_node);
     bool graph_coloring_BIS(int K, std::vector<int> &assigned_colours);
 
@@ -75,7 +73,7 @@ public:
     
     bool try_graph_coloring_NOISY(int node, int K, std::vector<int> &assigned_colors);
     bool graph_coloring_NOISY(int K, std::vector<int> &assigned_colours); 
-    bool try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
+    bool try_graph_coloring_BIS_NOISY(int node, int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col,
                                     std::vector<int> &assigned_colors, int colored_node);
     bool graph_coloring_BIS_NOISY(int K, std::vector<int> &assigned_colours);
 };

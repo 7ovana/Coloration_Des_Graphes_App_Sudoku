@@ -12,7 +12,7 @@ using std::endl;
         3. Do that for cols, which will be updated every time in the recursive function.
             col should be of type std::unordered_map<int, std::pair<int, std::vector<int>>>
 */ 
-/*
+//*
 void test_graph_constructors(){
     // Testing empty graph constructor
     
@@ -52,19 +52,35 @@ void test_cols(Graphe G){
 
     int K = 3;
     std::vector<int> assigned_colours(G.N,0);
-    std::unordered_map<int, std::vector<int>> neighbours = G.neighbours();
+
+    std::unordered_map<int, std::pair<int, std::vector<int>>> col;
+
 
     cout << "Number of colours for the graph coloration:\nK = " << K << "\ncols = "; 
 
-    std::vector<int> cols = G.cols(0,K, assigned_colours, neighbours);
-    for (int i : cols) cout << i << "\t";
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        G.cols(i, K, col, assigned_colours);
+        cout << col[i].first << "\t"; 
+    }
+    cout << endl;
+
+    cout << "\nAvailable colours for node 0:\n";
+    for (int i : col[0].second) cout << i << "\t";
     cout << endl;
 
     // test si son voisin a pris une couleur
     cout << "\nAfter assigning color 1 to node 4\ncols = ";
     assigned_colours[4] = 1;
-    cols = G.cols(0,K,assigned_colours, neighbours);
-    for (int i : cols) cout << i << "\t";
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        G.cols(i, K, col, assigned_colours);
+        cout << col[i].first << "\t"; 
+    }
+    cout << endl;
+
+    cout << "\nAvailable colours for node 0:\n";
+    for (int i : col[0].second) cout << i << "\t";
     cout << endl;
 
     // test si la couleur est déjà attribuée au noeud 0 
@@ -72,9 +88,17 @@ void test_cols(Graphe G){
     cout << "(we're expecting an empty vector here)\ncols = ";
     assigned_colours[4] = 0;
     assigned_colours[0] = 1;
-    cols = G.cols(0, K, assigned_colours, neighbours);
-    for (int i : cols) cout << i << "\t";
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        G.cols(i, K, col, assigned_colours);
+        cout << col[i].first << "\t"; 
+    }
     cout << endl;
+
+    cout << "\nAvailable colours for node 0:\n";
+    for (int i : col[0].second) cout << i << "\t";
+    cout << endl;
+
 }
 void test_Init(Graphe G){
     cout << "\n//------------------- Test for Init ---------------------//\n";
@@ -87,28 +111,39 @@ void test_Init(Graphe G){
 
     int K = 3;
     std::vector<int> assigned_colours(G.N,0);
-    std::unordered_map<int, std::vector<int>> neighbours = G.neighbours();
+    std::unordered_map<int, std::pair<int, std::vector<int>>> col;
 
     cout << "Number of colours for the graph coloration:\nK = " << K << endl;
     
-    std::vector<int> col(G.N);
-
     cout << "No pre-assigned colours check\n";
-    G.Init(K, col, assigned_colours, neighbours);
+    G.Init(K, col, assigned_colours);
 
-    cout << "col =\t";
-    for (int i: col) cout << i << "\t";
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        cout << col[i].first << "\t"; 
+    }
+    cout << endl;
+
+    cout << "\nAvailable colours for node 0:\n";
+    for (int i : col[0].second) cout << i << "\t";
     cout << endl;
 
     cout << "\nAfter assigning color 1 to node 1 and color 2 to node 4:\n";
     assigned_colours[1] = 1;
     assigned_colours[4] = 2;
-    G.Init(K, col, assigned_colours, neighbours);
+    G.Init(K, col, assigned_colours);
 
-    cout << "col =\t";
-    for (int i: col) cout << i << "\t";
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        cout << col[i].first << "\t"; 
+    }
+    cout << endl;
+
+    cout << "\nAvailable colours for node 0:\n";
+    for (int i : col[0].second) cout << i << "\t";
     cout << endl;
 }
+
 void test_sort_by_available_colours(Graphe G){
     cout << "\n//------------------- Test sort_by_available_colours ---------------------//\n";
     cout << "Graph parameters:\nnumber of nodes: " 
@@ -120,17 +155,14 @@ void test_sort_by_available_colours(Graphe G){
 
     int K = 3;
     std::vector<int> assigned_colours(G.N,0);
-    std::unordered_map<int, std::vector<int>> neighbours = G.neighbours();
-
+    std::unordered_map<int, std::pair<int, std::vector<int>>> col;
 
     cout << "Number of colours for the graph coloration:\nK = " << K << endl;
     std::vector<int> nodes(G.N);
     for (int i = 0; i < G.N; i++) nodes[i] = i;
 
-    std::vector<int> col(G.N);
-
     cout << "With no pre-assigned colours\n";
-    G.sort_by_available_colours(K, nodes, assigned_colours, neighbours);
+    G.sort_by_available_colours(K, nodes, col, assigned_colours);
     cout << "nodes to pick from =\t";
     for (int node : nodes) cout << node << "\t";
     cout << endl;
@@ -138,14 +170,17 @@ void test_sort_by_available_colours(Graphe G){
     cout << "\nAfter assigning color 1 to node 1 and color 2 to node 4:\n";
     assigned_colours[1] = 1;
     assigned_colours[4] = 2;
-    G.Init(K, col, assigned_colours, neighbours);
 
-    cout << "col =\t";
-    for (int i: col) cout << i << "\t";
+    G.Init(K, col, assigned_colours);
+
+    cout << "Number of available colours for all nodes:\ncols =\t";
+    for (int i = 0; i < G.N; i ++){
+        cout << col[i].first << "\t"; 
+    }
     cout << endl;
 
     cout << "nodes to pick from =\t";
-    G.sort_by_available_colours(K, nodes, assigned_colours, neighbours);
+    G.sort_by_available_colours(K, nodes, col, assigned_colours);
     for (int node : nodes) cout << node << "\t";
     cout << endl;
 }
@@ -180,7 +215,7 @@ void test_functions_and_methods_used(){
     cout << "\nblabla à écrire\n";
     test_sort_by_available_colours(G2);
 }
-//*/
+
 
 void test_graph_coloring(Graphe G, int K, bool noisy){
     clock_t t1, t2;
@@ -284,9 +319,12 @@ int main(int argc, const char ** argv)
     Graphe G2("G2.txt");
     Graphe G("G.txt");
 
-    for (auto i : G2.vois[0]) cout << i << endl;
-
+    test_cols(G2);
+    test_Init(G2);
+    test_sort_by_available_colours(G2);
     //test_functions_and_methods_used();
+
+    std::vector<int> assigned_colors(G.N, 0);
     
     int K = 3;
     bool noisy = true;
@@ -302,18 +340,19 @@ int main(int argc, const char ** argv)
     //write_arcs_sudoku(3);
     //write_arcs_sudoku(4);
 
-
+//*
     //test_sudoku(4, "sudoku_4x4_test_entries.txt");
     //test_sudoku(9, "sudoku_9x9_test_entries.txt");
     //test_sudoku(9, "sudoku_9x9_test_entries_2.txt");
-    //test_sudoku(9, "medium.txt");
-    //test_sudoku(9, "hard.txt");
-    //test_sudoku(9, "expert.txt");
+    test_sudoku(9, "09_probleme05.txt");
+    test_sudoku(9, "medium.txt");
+    test_sudoku(9, "hard.txt");
+    test_sudoku(9, "expert.txt");
 
     // Difficult grids for the backtracking algorithm
     test_sudoku(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt");
-    test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt");
-
+    //test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt");
+//*/
  /*   
     Sudoku WOW(16, "sudoku_16x16_test_entries.txt");
 
@@ -326,13 +365,6 @@ int main(int argc, const char ** argv)
     cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
     cout << WOW << endl;
 //*/
-
-    std::pair<int,std::vector<int>> test;
-    test.first = 3;
-    std::vector<int> m(3);
-    test.second = m;
-
-    cout << test.first << " " << test.second[0] << endl;
 
     cout << "end prog" << endl;
 

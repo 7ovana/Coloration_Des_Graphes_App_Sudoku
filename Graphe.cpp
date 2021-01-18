@@ -85,21 +85,24 @@ std::vector<int> Graphe::Adj(int node){
 
 std::unordered_map<int, std::vector<int>> Graphe:: neighbours(){
     std::unordered_map<int, std::vector<int>> map;
-    std::vector<int> neighbours;
 
     for (int i = 0; i < N; i++) map[i] = Adj(i);
     return map;
 }
 
-std::vector<int> Graphe:: cols(int node, int K, std::vector<int> &assigned_colors){
+void Graphe:: cols(int node, int K, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors){
     assert(node < N && node >= 0);
 
+    std::vector<int> available_colours(0);
     // vecteur qui contiendra les couleurs disponibles
-    std::vector<int> colors_available;
 
     // si le sommet a déjà une couleur attribuée on renvoie un vecteur vide
-    if (assigned_colors[node] != 0) return colors_available;
-   
+    if (assigned_colors[node] != 0) {
+        col[node].first = -1;
+        col[node].second = available_colours;
+        return;
+    }
+
     for (int color = 1; color <= K; color++) {
         bool free_color = true;
         for (int neighbour : vois[node]) {
@@ -108,55 +111,42 @@ std::vector<int> Graphe:: cols(int node, int K, std::vector<int> &assigned_color
                 // on marque qu'elle n'est pas disponible
                 free_color = false;
         }
-        if (free_color) colors_available.push_back(color);    
-    }  
-    return colors_available;
+        if (free_color) available_colours.push_back(color);    
+    }
+
+    col[node].first = available_colours.size();
+    col[node].second = available_colours;  
 }
 
-void Graphe:: Init(int K, std::vector<int> &col, std::vector<int> &assigned_colors){
+void Graphe:: Init(int K, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors){
     // col: vecteur qui contient le nb de couleurs dispo pour chaque sommet (de taille N)
     
     for (int i = 0; i < N; i++){
-        // on initialise cols à -1 comme si chaque couleur à été déjà attribuée
-        col[i] = -1; 
-        // puis si le noeud i n'a pas de coueleur attribuée 
-        if (assigned_colors[i] == 0){
-            // on met dans la case correspondante dans cols le nombre de couleurs disponibles pour i
-            col[i] = cols(i, K, assigned_colors).size();
-        }
+            cols(i, K, col, assigned_colors);
     }  
 }
 
-void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, std::vector<int> &assigned_colors){
+
+void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors){
 
     nodes = std::vector<int> (N);
-    std::vector<int> vois(N);
-    std::vector<int> col(N);
     Init(K, col, assigned_colors);
-
-    //std::cout << "col =\t";
-    //for (int i: col) std::cout << i << "\t";
-    //std::cout << std::endl; 
 
     // initialize original index locations
     iota(nodes.begin(), nodes.end(), 0);
-
+    //std::vector <int> tmp(col.begin(), col.end());
+ 
     //  sort indexes based on comparing values in col using std::stable_sort 
     //  instead of std::sort to avoid unnecessary index re-orderings 
     //  when col contains elements of equal values 
-    std::stable_sort(nodes.begin(), nodes.end(), [&col](int i1, int i2) {return col[i1] < col[i2];});
-    std::stable_sort(col.begin(), col.end());
+    std::stable_sort(nodes.begin(), nodes.end(), [&col](int i1, int i2) {return col[i1].first < col[i2].first;});
 
-    auto it_col = col.begin();
+    auto it_col = col.begin(); 
     auto it_nodes = nodes.begin();
-    while (*it_col == -1){
-        nodes.erase(it_nodes);
+    while (it_col != col.end()){
+        if (it_col->second.first == -1) nodes.erase(it_nodes);
         it_col++;
     }
-
-    //std::cout << "nodes =\t";
-    //for (int i: nodes) std::cout << i << "\t";
-    //std::cout << std::endl; 
 }
 
 /*
@@ -214,47 +204,41 @@ bool Graphe :: graph_coloring(int K, std::vector<int> &assigned_colours){
     return false;
 }
 
-bool Graphe::try_graph_coloring_BIS(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
+//*
+bool Graphe::try_graph_coloring_BIS(int node, int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col,
                                     std::vector<int> &assigned_colors, int colored_node){
 
     if (colored_node == N) return true;
 
-    for (int color = 1; color <= K; color++){
-        if (good_to_take(nodes[0], color, K, assigned_colors)){
-            
-            assigned_colors[nodes[0]] = color;
+    for (int color : col[node].second){            
+            assigned_colors[node] = color;
 
-            std::vector<int> nodes_bis = nodes;
-            sort_by_available_colours(K, nodes, assigned_colors);
+            sort_by_available_colours(K, nodes, col, assigned_colors);
             if (nodes.size() == 0) return true;
-            
+
             // backtracking
-            if (try_graph_coloring_BIS(K, nodes, available_colors, assigned_colors, colored_node+1) == true){
+            if (try_graph_coloring_BIS(nodes[0], K, nodes, col, assigned_colors, colored_node+1) == true){
                 return true;
             }        
 
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
             // cette couleur à ce sommet, et on remet sa couleur à 0
-            assigned_colors[nodes_bis[0]] = 0;
-            sort_by_available_colours(K, nodes, assigned_colors);
-        }
+            assigned_colors[node] = 0;
     }
-
     // si on ne peut attribuer aucune couleur à un sommet on renvoie false
     return false;
 }
 
 bool Graphe :: graph_coloring_BIS(int K, std::vector<int> &assigned_colours){
-    
-    std::vector<int> nodes(N);
-    for (int i = 0; i < N; i++) nodes[i] = i;
-    sort_by_available_colours(K, nodes, assigned_colours);
+    std::vector<int> nodes(N);    
+    std::unordered_map<int, std::pair<int, std::vector<int>>> col;
+    sort_by_available_colours(K, nodes, col, assigned_colours);
 
     if (nodes.size() == 0) {
         std::cout << "Sudoku already solved.\n";
         return true;
     }
-    if (try_graph_coloring_BIS(K, nodes, assigned_colours, assigned_colours, 0)){
+    if (try_graph_coloring_BIS(nodes[0], K, nodes, col, assigned_colours, 0)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }
@@ -306,20 +290,17 @@ bool Graphe :: graph_coloring_NOISY(int K, std::vector<int> &assigned_colours){
     return false;
 }
 
-bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
+bool Graphe::try_graph_coloring_BIS_NOISY(int node, int K, std::vector<int> &nodes, std::unordered_map<int, std::pair<int, std::vector<int>>> &col,
                                     std::vector<int> &assigned_colors, int colored_node){
 
     if (colored_node == N) return true;
 
-    for (int color = 1; color <= K; color++){
+    for (int color : col[node].second){
         std::cout << "\tcolor = " << color << std::endl;
-
-        if (good_to_take(nodes[0], color, K, assigned_colors)){
             
-            assigned_colors[nodes[0]] = color;
+            assigned_colors[node] = color;
 
-            std::vector<int> nodes_bis = nodes;
-            sort_by_available_colours(K, nodes, assigned_colors);
+            sort_by_available_colours(K, nodes, col, assigned_colors);
             if (nodes.size() == 0) return true;
 
             std::cout << "assigned_colours = ";
@@ -330,14 +311,14 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::v
             for (int i: nodes) std::cout << i << "\t";
             std::cout << std::endl;
             
-            if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colors, assigned_colors, colored_node+1) == true){
+            if (try_graph_coloring_BIS_NOISY(node, K, nodes, col, assigned_colors, colored_node+1) == true){
                 return true;
             }        
 
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
             // cette couleur à ce sommet, et on remet sa couleur à 0
-            assigned_colors[nodes_bis[0]] = 0;
-            sort_by_available_colours(K, nodes, assigned_colors);
+            assigned_colors[node] = 0;
+            sort_by_available_colours(K, nodes, col, assigned_colors);
 
             std::cout << "nodes_OUT = ";
             for (int i: nodes) std::cout << i << "\t";
@@ -346,7 +327,6 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::v
             std::cout << "try_graph_coloring_BIS didn't work, we go back to the way it was before\n";
             for (int color : assigned_colors) std::cout << color << "\t";
             std::cout<<std::endl;
-        }
     }
 
     // si on ne peut attribuer aucune couleur à un sommet on renvoie false
@@ -355,20 +335,21 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::v
 
 bool Graphe :: graph_coloring_BIS_NOISY(int K, std::vector<int> &assigned_colours){
     std::vector<int> nodes(N);
-    for (int i = 0; i < N; i++) nodes[i] = i;
-    sort_by_available_colours(K, nodes, assigned_colours);
+    std::unordered_map<int, std::pair<int, std::vector<int>>> col;
+    sort_by_available_colours(K, nodes, col, assigned_colours);
 
     if (nodes.size() == 0) {
         std::cout << "Sudoku already solved.\n";
         return true;
     }
-    if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colours, assigned_colours, 0)){
+    if (try_graph_coloring_BIS_NOISY(nodes[0], K, nodes, col, assigned_colours, 0)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }
     std::cout << "Solution doesn't exist.\n";
     return false;
 }
+
 
 // -------------------------------------------------------------------------------------------------------
 
