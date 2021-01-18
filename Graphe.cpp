@@ -25,6 +25,8 @@ Graphe::Graphe(const char * filename) { // constructeur a partir d'un fichier te
         ListA[i].a = a;  ListA[i].b = b;
     }
     f.close();
+
+    vois = this->neighbours();
 }
 
 Graphe::Graphe(int size) {
@@ -89,7 +91,7 @@ std::unordered_map<int, std::vector<int>> Graphe:: neighbours(){
     return map;
 }
 
-std::vector<int> Graphe:: cols(int node, int K, std::vector<int> assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+std::vector<int> Graphe:: cols(int node, int K, std::vector<int> &assigned_colors){
     assert(node < N && node >= 0);
 
     // vecteur qui contiendra les couleurs disponibles
@@ -100,7 +102,7 @@ std::vector<int> Graphe:: cols(int node, int K, std::vector<int> assigned_colors
    
     for (int color = 1; color <= K; color++) {
         bool free_color = true;
-        for (int neighbour : neighbours[node]) {
+        for (int neighbour : vois[node]) {
             // Si un des voisins de node contient color
             if (assigned_colors[neighbour] == color)
                 // on marque qu'elle n'est pas disponible
@@ -111,7 +113,7 @@ std::vector<int> Graphe:: cols(int node, int K, std::vector<int> assigned_colors
     return colors_available;
 }
 
-void Graphe:: Init(int K, std::vector<int> &col, std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+void Graphe:: Init(int K, std::vector<int> &col, std::vector<int> &assigned_colors){
     // col: vecteur qui contient le nb de couleurs dispo pour chaque sommet (de taille N)
     
     for (int i = 0; i < N; i++){
@@ -120,17 +122,17 @@ void Graphe:: Init(int K, std::vector<int> &col, std::vector<int> &assigned_colo
         // puis si le noeud i n'a pas de coueleur attribuée 
         if (assigned_colors[i] == 0){
             // on met dans la case correspondante dans cols le nombre de couleurs disponibles pour i
-            col[i] = cols(i, K, assigned_colors, neighbours).size();
+            col[i] = cols(i, K, assigned_colors).size();
         }
     }  
 }
 
-void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, std::vector<int> &assigned_colors){
 
     nodes = std::vector<int> (N);
     std::vector<int> vois(N);
     std::vector<int> col(N);
-    Init(K, col, assigned_colors, neighbours);
+    Init(K, col, assigned_colors);
 
     //std::cout << "col =\t";
     //for (int i: col) std::cout << i << "\t";
@@ -161,11 +163,11 @@ void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, std::vect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
-bool Graphe:: good_to_take(int node, int color, int K, std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+bool Graphe:: good_to_take(int node, int color, int K, std::vector<int> &assigned_colors){
     assert(node < N && node >= 0);
     assert(color <= K && color > 0);
 
-    for (int neighbour : neighbours[node]) {
+    for (int neighbour : vois[node]) {
         if (assigned_colors[neighbour] == color) {
             //std::cout<<"\t\tcolor taken by neighbours\n";
             return false;
@@ -175,22 +177,22 @@ bool Graphe:: good_to_take(int node, int color, int K, std::vector<int> &assigne
     return true;
 }
 
-bool Graphe:: try_graph_coloring(int node, int K, std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+bool Graphe:: try_graph_coloring(int node, int K, std::vector<int> &assigned_colors){
     // si tout est déjà attribué c'est bon, on sort de la récursion 
     if (node == N) return true;
 
     // si une couleur est déjà atttribuée on fait le backtracking directement
     if (assigned_colors[node] != 0){
-        return try_graph_coloring(node + 1, K, assigned_colors, neighbours);
+        return try_graph_coloring(node + 1, K, assigned_colors);
     }
 
     for (int color = 1; color <= K; color++){  
-        if (good_to_take(node, color, K, assigned_colors, neighbours)){
+        if (good_to_take(node, color, K, assigned_colors)){
             
             assigned_colors[node] = color;
 
             // backtracking:
-            if (try_graph_coloring(node + 1, K, assigned_colors, neighbours) == true){
+            if (try_graph_coloring(node + 1, K, assigned_colors) == true){
                 return true;
             }
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
@@ -203,9 +205,8 @@ bool Graphe:: try_graph_coloring(int node, int K, std::vector<int> &assigned_col
 }
 
 bool Graphe :: graph_coloring(int K, std::vector<int> &assigned_colours){
-    std::unordered_map<int, std::vector<int>> neighbours = this->neighbours();
 
-    if (try_graph_coloring(0, K, assigned_colours, neighbours)){
+    if (try_graph_coloring(0, K, assigned_colours)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }
@@ -214,28 +215,28 @@ bool Graphe :: graph_coloring(int K, std::vector<int> &assigned_colours){
 }
 
 bool Graphe::try_graph_coloring_BIS(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
-                                    std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours, int colored_node){
+                                    std::vector<int> &assigned_colors, int colored_node){
 
     if (colored_node == N) return true;
 
     for (int color = 1; color <= K; color++){
-        if (good_to_take(nodes[0], color, K, assigned_colors, neighbours)){
+        if (good_to_take(nodes[0], color, K, assigned_colors)){
             
             assigned_colors[nodes[0]] = color;
 
             std::vector<int> nodes_bis = nodes;
-            sort_by_available_colours(K, nodes, assigned_colors, neighbours);
+            sort_by_available_colours(K, nodes, assigned_colors);
             if (nodes.size() == 0) return true;
             
             // backtracking
-            if (try_graph_coloring_BIS(K, nodes, available_colors, assigned_colors, neighbours, colored_node+1) == true){
+            if (try_graph_coloring_BIS(K, nodes, available_colors, assigned_colors, colored_node+1) == true){
                 return true;
             }        
 
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
             // cette couleur à ce sommet, et on remet sa couleur à 0
             assigned_colors[nodes_bis[0]] = 0;
-            sort_by_available_colours(K, nodes, assigned_colors, neighbours);
+            sort_by_available_colours(K, nodes, assigned_colors);
         }
     }
 
@@ -247,14 +248,13 @@ bool Graphe :: graph_coloring_BIS(int K, std::vector<int> &assigned_colours){
     
     std::vector<int> nodes(N);
     for (int i = 0; i < N; i++) nodes[i] = i;
-    std::unordered_map<int, std::vector<int>> neighbours = this->neighbours();
-    sort_by_available_colours(K, nodes, assigned_colours, neighbours);
+    sort_by_available_colours(K, nodes, assigned_colours);
 
     if (nodes.size() == 0) {
         std::cout << "Sudoku already solved.\n";
         return true;
     }
-    if (try_graph_coloring_BIS(K, nodes, assigned_colours, assigned_colours, neighbours, 0)){
+    if (try_graph_coloring_BIS(K, nodes, assigned_colours, assigned_colours, 0)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }
@@ -263,7 +263,7 @@ bool Graphe :: graph_coloring_BIS(int K, std::vector<int> &assigned_colours){
 }
 
 
-bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours){
+bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assigned_colors){
     // si tout est déjà attribué c'est bon, on sort de la récursion 
     if (node == N) return true;
     std::cout<< "node = " << node << std::endl;
@@ -271,7 +271,7 @@ bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assign
     for (int color = 1; color <= K; color++){
         std::cout << "\tcolor = " << color << std::endl;
         
-        if (good_to_take(node, color, K, assigned_colors, neighbours)){
+        if (good_to_take(node, color, K, assigned_colors)){
             
             assigned_colors[node] = color;
             
@@ -280,7 +280,7 @@ bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assign
             std::cout << std::endl;
 
             // backtracking:
-            if (try_graph_coloring_NOISY(node + 1, K, assigned_colors, neighbours) == true){
+            if (try_graph_coloring_NOISY(node + 1, K, assigned_colors) == true){
                 return true;
             }
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
@@ -297,9 +297,8 @@ bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assign
 }
 
 bool Graphe :: graph_coloring_NOISY(int K, std::vector<int> &assigned_colours){
-    std::unordered_map<int, std::vector<int>> neighbours = this->neighbours();
 
-    if (try_graph_coloring_NOISY(0, K, assigned_colours, neighbours)){
+    if (try_graph_coloring_NOISY(0, K, assigned_colours)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }
@@ -308,19 +307,19 @@ bool Graphe :: graph_coloring_NOISY(int K, std::vector<int> &assigned_colours){
 }
 
 bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::vector<int> &available_colors,
-                                    std::vector<int> &assigned_colors, std::unordered_map<int, std::vector<int>> &neighbours, int colored_node){
+                                    std::vector<int> &assigned_colors, int colored_node){
 
     if (colored_node == N) return true;
 
     for (int color = 1; color <= K; color++){
         std::cout << "\tcolor = " << color << std::endl;
 
-        if (good_to_take(nodes[0], color, K, assigned_colors, neighbours)){
+        if (good_to_take(nodes[0], color, K, assigned_colors)){
             
             assigned_colors[nodes[0]] = color;
 
             std::vector<int> nodes_bis = nodes;
-            sort_by_available_colours(K, nodes, assigned_colors, neighbours);
+            sort_by_available_colours(K, nodes, assigned_colors);
             if (nodes.size() == 0) return true;
 
             std::cout << "assigned_colours = ";
@@ -331,14 +330,14 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::v
             for (int i: nodes) std::cout << i << "\t";
             std::cout << std::endl;
             
-            if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colors, assigned_colors, neighbours, colored_node+1) == true){
+            if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colors, assigned_colors, colored_node+1) == true){
                 return true;
             }        
 
             // mais si jamais on ne renvoie pas true il ne faut pas attribuer
             // cette couleur à ce sommet, et on remet sa couleur à 0
             assigned_colors[nodes_bis[0]] = 0;
-            sort_by_available_colours(K, nodes, assigned_colors, neighbours);
+            sort_by_available_colours(K, nodes, assigned_colors);
 
             std::cout << "nodes_OUT = ";
             for (int i: nodes) std::cout << i << "\t";
@@ -357,14 +356,13 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int K, std::vector<int> &nodes, std::v
 bool Graphe :: graph_coloring_BIS_NOISY(int K, std::vector<int> &assigned_colours){
     std::vector<int> nodes(N);
     for (int i = 0; i < N; i++) nodes[i] = i;
-    std::unordered_map<int, std::vector<int>> neighbours = this->neighbours();
-    sort_by_available_colours(K, nodes, assigned_colours, neighbours);
+    sort_by_available_colours(K, nodes, assigned_colours);
 
     if (nodes.size() == 0) {
         std::cout << "Sudoku already solved.\n";
         return true;
     }
-    if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colours, assigned_colours, neighbours, 0)){
+    if (try_graph_coloring_BIS_NOISY(K, nodes, assigned_colours, assigned_colours, 0)){
         std::cout << "Solution exists and it's found.\n";
         return true;
     }

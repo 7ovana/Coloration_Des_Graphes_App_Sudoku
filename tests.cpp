@@ -12,6 +12,7 @@ using std::endl;
         3. Do that for cols, which will be updated every time in the recursive function.
             col should be of type std::unordered_map<int, std::pair<int, std::vector<int>>>
 */ 
+/*
 void test_graph_constructors(){
     // Testing empty graph constructor
     
@@ -179,6 +180,7 @@ void test_functions_and_methods_used(){
     cout << "\nblabla à écrire\n";
     test_sort_by_available_colours(G2);
 }
+//*/
 
 void test_graph_coloring(Graphe G, int K, bool noisy){
     clock_t t1, t2;
@@ -250,7 +252,6 @@ void test_graph_coloring_BIS(Graphe G, int K, bool noisy){
         cout << "Time elapsed: " << (float)(t2-t1) / CLOCKS_PER_SEC << "s" << endl;
     }
 }
-
 void test_sudoku(int size, const char* entries){
     clock_t t1, t2;
     Sudoku S(size, entries);
@@ -278,16 +279,17 @@ void test_sudoku(int size, const char* entries){
 
 int main(int argc, const char ** argv)
 {
-
     clock_t t1, t2;
 
     Graphe G2("G2.txt");
     Graphe G("G.txt");
 
+    for (auto i : G2.vois[0]) cout << i << endl;
+
     //test_functions_and_methods_used();
     
     int K = 3;
-    //bool noisy = true;
+    bool noisy = true;
 
     //test_graph_coloring(G2, K, noisy);
     //test_graph_coloring_BIS(G2, K, noisy);
@@ -301,16 +303,16 @@ int main(int argc, const char ** argv)
     //write_arcs_sudoku(4);
 
 
-    test_sudoku(4, "sudoku_4x4_test_entries.txt");
-    test_sudoku(9, "sudoku_9x9_test_entries.txt");
-    test_sudoku(9, "sudoku_9x9_test_entries_2.txt");
-    test_sudoku(9, "medium.txt");
-    test_sudoku(9, "hard.txt");
-    test_sudoku(9, "expert.txt");
+    //test_sudoku(4, "sudoku_4x4_test_entries.txt");
+    //test_sudoku(9, "sudoku_9x9_test_entries.txt");
+    //test_sudoku(9, "sudoku_9x9_test_entries_2.txt");
+    //test_sudoku(9, "medium.txt");
+    //test_sudoku(9, "hard.txt");
+    //test_sudoku(9, "expert.txt");
 
     // Difficult grids for the backtracking algorithm
-    //test_sudoku(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt");
-    //test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt");
+    test_sudoku(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt");
+    test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt");
 
  /*   
     Sudoku WOW(16, "sudoku_16x16_test_entries.txt");
