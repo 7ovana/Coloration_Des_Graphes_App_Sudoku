@@ -17,6 +17,7 @@ void test_graph_constructors(){
     cout << G_default.N << endl;
     cout << G_default.ListA.size() << endl;
 }
+
 void test_Adj(Graphe G){
     cout << "Graph parameters:\nnumber of nodes: " 
          << G.N << "\nnumber of arcs: " << G.ListA.size() 
@@ -31,6 +32,7 @@ void test_Adj(Graphe G){
     for (int i : neighbours) cout << i << "\t";
     cout << endl << endl;
 }
+
 void test_cols(Graphe G){
     cout << "Graph parameters:\nnumber of nodes: " 
          << G.N << "\nnumber of arcs: " << G.ListA.size() 
@@ -88,6 +90,7 @@ void test_cols(Graphe G){
     for (int i : col[0].second) cout << i << "\t";
     cout << endl << endl;
 }
+
 void test_Init(Graphe G){
     cout << "Graph parameters:\nnumber of nodes: " 
          << G.N << "\nnumber of arcs: " << G.ListA.size() 
@@ -131,6 +134,7 @@ void test_Init(Graphe G){
     for (int i : col[0].second) cout << i << "\t";
     cout << endl << endl;
 }
+
 void test_sort_by_available_colours(Graphe G){
     cout << "Graph parameters:\nnumber of nodes: " 
          << G.N << "\nnumber of arcs: " << G.ListA.size() 
@@ -256,6 +260,7 @@ void test_graph_coloring(Graphe G, int K, bool noisy){
         cout << "Time elapsed: " << (float)(t2-t1) / CLOCKS_PER_SEC << "s" << endl;
     }
 }
+
 void test_graph_coloring_BIS(Graphe G, int K, bool noisy){
     clock_t t1, t2;
 
@@ -316,6 +321,7 @@ void test_sudoku(int size, const char* entries, bool print_solution){
     if (print_solution) cout << S << endl;
 
 }
+
 void test_7_sudokus(bool print_solution){
     cout << "\n\n----------------------- EASY: 38 clues -----------------------\n\n";
     test_sudoku(9, "easy.txt", print_solution); // 38 clues
@@ -343,6 +349,7 @@ int main(int argc, const char ** argv)
 
     //test_class_methods();
     
+    /*
     int K = 3;
     cout << "\nExemple de coloration valide du graphe de Petersen, avec K = 3\n\n";
     test_graph_coloring(G2, K, noisy);
@@ -356,7 +363,8 @@ int main(int argc, const char ** argv)
     cout << "\nExemple simple où on voit la différence des deux algorithmes, K = 3\n\n";
     K = 3;
     test_graph_coloring(G, K, noisy);
-    test_graph_coloring_BIS(G, K, noisy);
+    test_graph_coloring_BIS(G, K, noisy);   
+    //*/
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -365,13 +373,24 @@ int main(int argc, const char ** argv)
     //write_arcs_sudoku(2);
     //write_arcs_sudoku(3);
 
-    cout << "Exemple d'un sudoku de taille 4x4\n\n";
+    /*
+    cout << "\n\nExemple d'un sudoku de taille 4x4\n\n";
     test_sudoku(4, "sudoku_4x4_test_entries.txt", print_solution);
-    cout << "Exemple d'un sudoku de taille 9x9\n\n";
+    cout << "\n\nExemple d'un sudoku de taille 9x9\n\n";
     test_sudoku(9, "sudoku_9x9_test_entries.txt", print_solution);
 
-    //test_7_sudokus(false);
+    print_solution = false;
+    //test_7_sudokus(print_solution);
+//*/
 
+    Sudoku ultra(9, "hyper_expert_des.txt");
+    cout << ultra << endl;
+    clock_t t1, t2;
+    t1 = clock();
+    ultra.graph_coloring_BIS(9, ultra.entries);
+    t2 = clock();
+    cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
+    cout << ultra << endl;
     cout << "end prog" << endl;
 
     return 0;

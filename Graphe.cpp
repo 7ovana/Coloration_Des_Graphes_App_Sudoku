@@ -107,16 +107,16 @@ void Graphe:: Init(int K, std::vector<std::pair<int, std::vector<int>>> &col, st
             cols(i, K, col, assigned_colors);
     }  
 }
-void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes, 
+void Graphe:: sort_by_available_colours(int K, std::vector<int> &nodes, 
                                        std::vector<std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors){
 
     nodes = std::vector<int> (N);
     Init(K, col, assigned_colors);
 
-    // initialize original index locations
+    // initialisation des localisations des indices originaux
     iota(nodes.begin(), nodes.end(), 0);
  
-    //  sort indexes based on comparing values in col using std::stable_sort 
+    //  tri des indices de col par rapport aux nombre de couleurs disponible 
     std::stable_sort(nodes.begin(), nodes.end(), [&col](int i1, int i2) {return col[i1].first < col[i2].first;});
 
     auto it_col = col.begin(); 
