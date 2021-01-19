@@ -22,13 +22,7 @@ public:
     Arc() : a(0.0), b(0.0) {}               // constructeur par defaut
     Arc(int a_, int b_) : a(a_), b(b_) {}   // constructeur avec valeurs
 
-    // méthode pour l'affichage 
-    std::string to_str() const {
-        std::stringstream ss;
-        ss << "(" << a << "," << b << ")" ;
-        return ss.str();
-    }
-    // surcharge de l'opérateur <<
+    std::string to_str() const;             // méthode pour l'affichage 
     friend std::ostream& operator<<(std::ostream & out, const Arc &arc){
         return out << arc.to_str();
     }
@@ -48,7 +42,6 @@ public:
     Graphe(int size); // constructeur pour les sudokus
     std::vector<std::vector<int>> neighbours(); // stocke les voisins des nodes (sommets adjacents) dans vois
 
-    std::vector<int> neighborsArcs(int node); // renvoie la liste des indices des arcs attaches au node
     std::vector<int> Adj(int node); // renvoie les voisins du node (sommets adjacents)
     void cols(int node, int K, std::vector<std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors); // renvoie la liste des couleurs disponibles pour node
     void Init(int K, std::vector<std::pair<int, std::vector<int>>> &col, std::vector<int> &assigned_colors); // initialise col

@@ -1,5 +1,19 @@
 #include "Graphe.hpp"
 
+// ---------------------------- CLASSE ARC --------------------------------- //
+
+// Méthode d'Affichage
+
+std::string Arc ::to_str() const {
+    std::stringstream ss;
+    ss << "(" << a << "," << b << ")" ;
+    return ss.str();
+}
+
+// ---------------------------- CLASSE GRAPHE --------------------------------- //
+
+// Construteurs
+
 Graphe::Graphe(const char * filename) { // constructeur a partir d'un fichier texte
     std::ifstream  f(filename);
     assert( f );
@@ -28,7 +42,6 @@ Graphe::Graphe(const char * filename) { // constructeur a partir d'un fichier te
 
     vois = this->neighbours();
 }
-
 Graphe::Graphe(int size) { // constructeur pour les sudokus
         switch (size)
         {
@@ -44,33 +57,8 @@ Graphe::Graphe(int size) { // constructeur pour les sudokus
         }
 }
 
+// Méthodes
 
-///////////////////////////////////////////////////////////////////////////////////////
-
-std::vector<int> Graphe::neighborsArcs(int i) {
-    assert( i < N && i >= 0);
-
-    std::vector<int> ret;  // a vector of Arc that will be progressively filled
-
-    // fonction indiquant si l'arc A est voisin du noeud i
-    auto is_neighbor = [&](const Arc A) -> bool {
-        return (A.a == i) || (A.b == i);
-    };
-
-    // std::vector<Arc>::iterator it;
-    auto it = ListA.begin();
-    while( true )
-    {
-        it = std::find_if(it, ListA.end(), is_neighbor);
-        if( it == ListA.end() )
-            break;
-
-        ret.push_back(it - ListA.begin());
-        it++;
-    }
-
-    return ret;
-}
 std::vector<int> Graphe::Adj(int node){ // sommets adjacents de node
     assert(node < N && node >= 0);
     std::vector<int> voisins;
@@ -138,10 +126,6 @@ void Graphe::sort_by_available_colours(int K, std::vector<int> &nodes,
         it_col++;
     }
 }
-
-/*
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
 
 bool Graphe:: good_to_take(int node, int color, int K, std::vector<int> &assigned_colors){
     assert(node < N && node >= 0);
@@ -265,7 +249,6 @@ bool Graphe:: try_graph_coloring_NOISY(int node, int K, std::vector<int> &assign
     // si on ne peut attribuer aucune couleur à un sommet on renvoie false
     return false;
 }
-
 bool Graphe :: graph_coloring_NOISY(int K, std::vector<int> &assigned_colours){
 
     if (try_graph_coloring_NOISY(0, K, assigned_colours)){
@@ -275,7 +258,6 @@ bool Graphe :: graph_coloring_NOISY(int K, std::vector<int> &assigned_colours){
     std::cout << "Solution doesn't exist.\n";
     return false;
 }
-
 bool Graphe::try_graph_coloring_BIS_NOISY(int node, int K, std::vector<int> &nodes, std::vector<std::pair<int, std::vector<int>>> &col,
                                     std::vector<int> &assigned_colors, int colored_node){
     if (colored_node == N) return true;
@@ -314,7 +296,6 @@ bool Graphe::try_graph_coloring_BIS_NOISY(int node, int K, std::vector<int> &nod
     // si on ne peut attribuer aucune couleur à un sommet on renvoie false
     return false;
 }
-
 bool Graphe :: graph_coloring_BIS_NOISY(int K, std::vector<int> &assigned_colours){
     std::vector<int> nodes(N);
     std::vector<std::pair<int, std::vector<int>>> col (N);
@@ -332,8 +313,9 @@ bool Graphe :: graph_coloring_BIS_NOISY(int K, std::vector<int> &assigned_colour
     return false;
 }
 
+// ---------------------------- CLASSE SUDOKU --------------------------------- //
 
-// -------------------------------------------------------------------------------------------------------
+// Construteur
 
 Sudoku :: Sudoku (int size, const char* filename_entries) : Graphe(size) {
     std::ifstream  f(filename_entries);
@@ -357,6 +339,8 @@ Sudoku :: Sudoku (int size, const char* filename_entries) : Graphe(size) {
     }
     f.close();
 }
+
+// Surcharge de l'opérateur <<
 
 std::ostream& operator<<(std::ostream & out, const Sudoku &S){
 
@@ -396,6 +380,8 @@ std::ostream& operator<<(std::ostream & out, const Sudoku &S){
     }
     return out;
 }
+
+// Fonction pour écrire les arcs des grilles de sudoku de taille n^2 x n^2
 
 void write_arcs_sudoku(int n){
 
