@@ -7,7 +7,6 @@
 using std::cout;
 using std::endl;
 
-
 void test_graph_constructors(){
     // Testing empty graph constructors
     
@@ -171,6 +170,7 @@ void test_sort_by_available_colours(Graphe G){
     for (int node : nodes) cout << node << "\t";
     cout << endl << endl; 
 }
+
 void test_class_methods(){
 
     Graphe G2("G2.txt");
@@ -291,9 +291,11 @@ void test_graph_coloring_BIS(Graphe G, int K, bool noisy){
         cout << "Time elapsed: " << (float)(t2-t1) / CLOCKS_PER_SEC << "s" << endl;
     }
 }
-void test_sudoku(int size, const char* entries){
+
+void test_sudoku(int size, const char* entries, bool print_solution){
     clock_t t1, t2;
     Sudoku S(size, entries);
+    if (print_solution) cout << S << endl;
 
     int K = sqrt(S.N);
     
@@ -302,6 +304,7 @@ void test_sudoku(int size, const char* entries){
     S.graph_coloring(K, S.entries);
     t2 = clock();
     cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
+    if (print_solution) cout << S << endl;
 
     S = Sudoku (size, entries);
 
@@ -310,36 +313,30 @@ void test_sudoku(int size, const char* entries){
     S.graph_coloring_BIS(K, S.entries);
     t2 = clock();
     cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
+    if (print_solution) cout << S << endl;
+
 }
-
-void test_sudoku_print_solution(int size, const char* entries){
-    clock_t t1, t2;
-    Sudoku S(size, entries);
-
-    int K = sqrt(S.N);
-    cout << S << endl;
-    
-    cout << "\nGraph_coloring\n\n";
-    t1 = clock();
-    S.graph_coloring(K, S.entries);
-    t2 = clock();
-    cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
-    cout << S << endl;
-
-    S = Sudoku (size, entries);
-
-    cout << "\nGraph_coloring_BIS\n\n";
-    t1 = clock();
-    S.graph_coloring_BIS(K, S.entries);
-    t2 = clock();
-    cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
-    cout << S << endl;    
+void test_7_sudokus(bool print_solution){
+    cout << "\n\n----------------------- EASY: 38 clues -----------------------\n\n";
+    test_sudoku(9, "easy.txt", print_solution); // 38 clues
+    cout << "\n\n----------------------- MEDIUM: 30 clues -----------------------\n\n";
+    test_sudoku(9, "medium.txt", print_solution); // 30 clues
+    cout << "\n\n----------------------- HARD: 25 clues -----------------------\n\n";
+    test_sudoku(9, "hard.txt", print_solution); // 25 clues
+    cout << "\n\n----------------------- EXPERT: 22 clues -----------------------\n\n";
+    test_sudoku(9, "expert.txt", print_solution); // 22 clues
+    cout << "\n\n----------------------- SUPER EXPERT: 19 clues -----------------------\n\n";
+    test_sudoku(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt", print_solution); // 19 clues
+    cout << "\n\n----------------------- HYPER EXPERT: 17 clues -----------------------\n\n";
+    test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt", print_solution); // 17 clues  
+    cout << "\n\n----------------------- ULTRA EXPERT: 17 clues -----------------------\n\n";
+    test_sudoku(9, "hyper_expert_des.txt", print_solution); // 17 clues
 }
 
 int main(int argc, const char ** argv)
 {
     bool noisy = true;
-    bool print_solution = false;
+    bool print_solution = true;
     
     Graphe G2("G2.txt");
     Graphe G("G.txt");
@@ -347,14 +344,19 @@ int main(int argc, const char ** argv)
     //test_class_methods();
     
     int K = 3;
-    cout << "Example where coloration works, K = 3\n\n";
+    cout << "\nExemple de coloration valide du graphe de Petersen, avec K = 3\n\n";
     test_graph_coloring(G2, K, noisy);
     test_graph_coloring_BIS(G2, K, noisy);
 
-    cout << "Example where coloration doesn't work, K = 2\n\n";
+    cout << "\nExemple où il n'y a pas de coloration valide du graphe de Petersen, avec K = 2\n\n";
     K = 2;
     test_graph_coloring(G2, K, noisy);
     test_graph_coloring_BIS(G2, K, noisy);
+
+    cout << "\nExemple simple où on voit la différence des deux algorithmes, K = 3\n\n";
+    K = 3;
+    test_graph_coloring(G, K, noisy);
+    test_graph_coloring_BIS(G, K, noisy);
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -362,55 +364,13 @@ int main(int argc, const char ** argv)
 
     //write_arcs_sudoku(2);
     //write_arcs_sudoku(3);
-    //write_arcs_sudoku(4);
 
-    //test_sudoku(4, "sudoku_4x4_test_entries.txt");
-/*
-    if (print_solution) {
+    cout << "Exemple d'un sudoku de taille 4x4\n\n";
+    test_sudoku(4, "sudoku_4x4_test_entries.txt", print_solution);
+    cout << "Exemple d'un sudoku de taille 9x9\n\n";
+    test_sudoku(9, "sudoku_9x9_test_entries.txt", print_solution);
 
-        test_sudoku_print_solution(9, "easy.txt"); // 38 clues
-        test_sudoku_print_solution(9, "medium.txt"); // 30 clues
-        test_sudoku_print_solution(9, "hard.txt"); // 25 clues
-        //test_sudoku_print_solution(9, "sudoku_9x9_test_entries.txt"); // 24 clues 
-        //test_sudoku_print_solution(9, "sudoku_9x9_test_entries_2.txt"); // 24 clues
-        test_sudoku_print_solution(9, "expert.txt"); // 22 clues
-
-        // Difficult grids for the backtracking algorithm
-        //test_sudoku_print_solution(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt"); // 19 clues
-        //test_sudoku_print_solution(9, "sudoku_9x9_17_diagonal_symmetry.txt"); // 17 clues
-    }
-    else{
-        cout << "\n\n----------------------- EASY: 38 clues -----------------------\n\n";
-        test_sudoku(9, "easy.txt"); // 38 clues
-        cout << "\n\n----------------------- MEDIUM: 30 clues -----------------------\n\n";
-        test_sudoku(9, "medium.txt"); // 30 clues
-        cout << "\n\n----------------------- HARD: 25 clues -----------------------\n\n";
-        test_sudoku(9, "hard.txt"); // 25 clues
-        //test_sudoku(9, "sudoku_9x9_test_entries.txt"); // 24 clues 
-        //test_sudoku(9, "sudoku_9x9_test_entries_2.txt"); // 24 clues
-        cout << "\n\n----------------------- EXPERT: 22 clues -----------------------\n\n";
-        test_sudoku(9, "expert.txt"); // 22 clues
-        cout << "\n\n----------------------- SUPER EXPERT: 19 clues -----------------------\n\n";
-        test_sudoku(9, "sudoku_9x9_19_two-way_orthogonal_symmetry.txt"); // 19 clues
-        cout << "\n\n----------------------- HYPER EXPERT: 17 clues -----------------------\n\n";
-        test_sudoku(9, "sudoku_9x9_17_diagonal_symmetry.txt"); // 17 clues        
-    }
-*/
-    test_sudoku_print_solution(9, "hyper_expert_des.txt");
-
-
- /*   
-    Sudoku WOW(16, "sudoku_16x16_test_entries.txt");
-
-    K = sqrt(WOW.N);
-    cout << "Sudoku of size: " << K << "x" << K << endl;
-    cout << WOW << endl;
-    t1 = clock();
-    WOW.graph_coloring_BIS(K, WOW.entries);
-    t2 = clock();
-    cout << "Sudoku solved in: " << (float)(t2 - t1) / CLOCKS_PER_SEC << "s" << endl;
-    cout << WOW << endl;
-//*/
+    //test_7_sudokus(false);
 
     cout << "end prog" << endl;
 
